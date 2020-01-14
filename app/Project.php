@@ -17,4 +17,14 @@ class Project extends Model
     {
         return "/projects/{$this->id}";
     }
+
+    /**
+     * Get owner of project
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function owner()
+    {
+        return $this->belongsTo('App\User');
+    }
 }

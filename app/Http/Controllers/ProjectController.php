@@ -11,11 +11,12 @@ class ProjectController extends Controller
     /**
      * Project list
      *
+     * @param Auth $auth
      * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
      */
-    public function index()
+    public function index(Auth $auth)
     {
-        $projects = Project::all();
+        $projects = Auth::user()->projects;
 
         return view('projects.index', compact('projects'));
     }
@@ -24,10 +25,15 @@ class ProjectController extends Controller
      * Show project details
      *
      * @param Project $project
+     * @param Auth $auth
      * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
      */
-    public function show(Project $project)
+    public function show(Project $project, Auth $auth)
     {
+        if (Auth::user()->isNot($project->owner)) {
+            abort(403);
+        }
+
         return view('projects.show', compact('project'));
     }
 
