@@ -38,6 +38,16 @@ class ProjectController extends Controller
     }
 
     /**
+     * Create project form
+     *
+     * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
+     */
+    public function create()
+    {
+        return view('projects.create');
+    }
+
+    /**
      * Create Project
      *
      * @param Request $request
