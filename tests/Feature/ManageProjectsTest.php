@@ -86,7 +86,7 @@ class ManageProjectsTest extends TestCase
 
         $this->get($project->path())
             ->assertStatus(403);
-    }    
+    }
 
     /**
      * @test
