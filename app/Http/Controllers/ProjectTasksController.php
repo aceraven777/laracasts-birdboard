@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Task;
 use App\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProjectTasksController extends Controller
 {
-    public function store(Request $request, Auth $auth, Project $project)
+    /**
+     * Insert task
+     *
+     * @param Request $request
+     * @param Project $project
+     * @return \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+     */
+    public function store(Request $request, Project $project)
     {
         if (Auth::user()->isNot($project->owner)) {
             abort(403);
@@ -19,6 +27,32 @@ class ProjectTasksController extends Controller
         ]);
 
         $project->addTask($request->get('body'));
+
+        return redirect($project->path());
+    }
+
+    /**
+     * Update a task
+     *
+     * @param Request $request
+     * @param Project $project
+     * @param Task $task
+     * @return \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, Project $project, Task $task)
+    {
+        if (Auth::user()->isNot($project->owner)) {
+            abort(403);
+        }
+
+        $this->validate($request, [
+            'body' => 'required',
+        ]);
+
+        $task->update([
+            'body' => $request->input('body'),
+            'completed' => $request->has('completed'),
+        ]);
 
         return redirect($project->path());
     }

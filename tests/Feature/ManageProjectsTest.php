@@ -54,7 +54,7 @@ class ManageProjectsTest extends TestCase
 
         $response = $this->post('/projects', $attributes);
 
-        $project = Project::orderBy('id', 'DESC')->first();
+        $project = Project::where($attributes)->first();
         
         $response->assertRedirect($project->path());
 

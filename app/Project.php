@@ -9,6 +9,26 @@ class Project extends Model
     protected $fillable = ['owner_id', 'title', 'description'];
 
     /**
+     * Get owner of project
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function owner()
+    {
+        return $this->belongsTo('App\User');
+    }
+
+    /**
+     * Get project tasks
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks()
+    {
+        return $this->hasMany('App\Task');
+    }
+
+    /**
      * Get project uri path
      *
      * @return string
@@ -19,20 +39,11 @@ class Project extends Model
     }
 
     /**
-     * Get owner of project
+     * Add a task
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @param string $body
+     * @return \App\Task
      */
-    public function owner()
-    {
-        return $this->belongsTo('App\User');
-    }
-
-    public function tasks()
-    {
-        return $this->hasMany('App\Task');
-    }
-
     public function addTask($body)
     {
         return $this->tasks()->create(['body' => $body]);
