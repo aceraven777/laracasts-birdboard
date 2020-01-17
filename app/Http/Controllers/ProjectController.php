@@ -11,10 +11,9 @@ class ProjectController extends Controller
     /**
      * Project list
      *
-     * @param Auth $auth
      * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
      */
-    public function index(Auth $auth)
+    public function index()
     {
         $projects = Auth::user()->projects;
 
@@ -25,10 +24,9 @@ class ProjectController extends Controller
      * Show project details
      *
      * @param Project $project
-     * @param Auth $auth
      * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
      */
-    public function show(Project $project, Auth $auth)
+    public function show(Project $project)
     {
         if (Auth::user()->isNot($project->owner)) {
             abort(403);
@@ -62,8 +60,8 @@ class ProjectController extends Controller
 
         $attributes = $request->only(['title', 'description']);
 
-        Auth::user()->projects()->create($attributes);
+        $project = Auth::user()->projects()->create($attributes);
 
-        return redirect('/projects');
+        return redirect($project->path());
     }
 }
