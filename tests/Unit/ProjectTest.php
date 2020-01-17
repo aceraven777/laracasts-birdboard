@@ -2,14 +2,16 @@
 
 namespace Tests\Unit;
 
+use App\Task;
 use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ProjectTest extends TestCase
 {
-    use RefreshDatabase;
+    use WithFaker, RefreshDatabase;
 
     /**
      * @test
@@ -28,6 +30,21 @@ class ProjectTest extends TestCase
     {
         $project = factory('App\Project')->create();
 
+
         $this->assertInstanceOf(User::class, $project->owner);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_add_a_task()
+    {
+        $project = factory('App\Project')->create();
+        
+        $body = $this->faker->sentence;
+        $task = $project->addTask($body);
+
+        $this->assertCount(1, $project->tasks);
+        $this->assertTrue($project->tasks->contains($task));
     }
 }
