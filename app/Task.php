@@ -8,6 +8,8 @@ class Task extends Model
 {
     protected $fillable = ['project_id', 'body', 'completed'];
 
+    protected $touches = ['project'];
+
     /**
      * Get the project of the task
      *
