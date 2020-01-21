@@ -17,6 +17,7 @@ class ManageProjectsTest extends TestCase
     public function guests_cannot_manage_projects()
     {
         $project = factory('App\Project')->create();
+        $project_raw = factory('App\Project')->raw();
 
         // Try to view projects
         $this->get('/projects')
@@ -31,7 +32,11 @@ class ManageProjectsTest extends TestCase
             ->assertRedirect('login');
 
         // Try to create a project
-        $this->post('/projects', $project->toArray())
+        $this->post('/projects', $project_raw)
+            ->assertRedirect('login');
+
+        // Try to update a project
+        $this->patch($project->path(), $project_raw)
             ->assertRedirect('login');
     }
 
@@ -49,18 +54,46 @@ class ManageProjectsTest extends TestCase
 
         $attributes = [
             'title' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'description' => $this->faker->sentence,
+            'notes' => $this->faker->paragraph,
         ];
 
         $response = $this->post('/projects', $attributes);
 
         $project = Project::where($attributes)->first();
-        
+
         $response->assertRedirect($project->path());
 
         $this->assertDatabaseHas('projects', $attributes);
 
-        $this->get('/projects')->assertSee($attributes['title']);
+        $this->get($project->path())
+            ->assertSee($attributes['title'])
+            ->assertSee($attributes['description'])
+            ->assertSee($attributes['notes']);
+    }
+
+    /**
+     * @test
+     */
+    public function a_user_can_update_a_project()
+    {
+        $this->withoutExceptionHandling();
+
+        $user = factory('App\User')->create();
+        $project = factory('App\Project')->create(['owner_id' => $user->id]);
+
+        $this->signIn($user);
+        
+        $changed_notes_text = 'Changed';
+
+        $this->patch($project->path(), [
+            'notes' => $changed_notes_text,
+        ])->assertRedirect($project->path());
+
+        $this->assertDatabaseHas('projects', [
+            'id' => $project->id,
+            'notes' => $changed_notes_text,
+        ]);
     }
 
     /**
@@ -89,6 +122,18 @@ class ManageProjectsTest extends TestCase
         $project = factory('App\Project')->create();
 
         $this->get($project->path())
+            ->assertStatus(403);
+    }
+
+    /**
+     * @test
+     */
+    public function an_authenticated_user_cannot_update_the_projects_of_others()
+    {
+        $this->signIn();
+        $project = factory('App\Project')->create();
+
+        $this->patch($project->path())
             ->assertStatus(403);
     }
 
