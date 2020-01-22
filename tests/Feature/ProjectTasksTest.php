@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Project;
 use Tests\TestCase;
+use Facades\Tests\Setup\ProjectFactory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -49,16 +50,14 @@ class ProjectTasksTest extends TestCase
         $user = factory('App\User')->create();
         $this->signIn($user);
 
-        $project = factory(Project::class)->create();
-
-        $task = $project->addTask('added task');
+        $project = ProjectFactory::withTasks(1)->create();
 
         $attributes = [
             'body' => 'changed task',
             'completed' => true,
         ];
 
-        $this->patch($task->path(), $attributes)
+        $this->patch($project->tasks()->first()->path(), $attributes)
             ->assertStatus(403);
 
         $this->assertDatabaseMissing('tasks', $attributes);
@@ -69,17 +68,14 @@ class ProjectTasksTest extends TestCase
      */
     public function a_project_can_have_tasks()
     {
-        $user = factory('App\User')->create();
-        $this->signIn($user);
-
-        $project_raw = factory(Project::class)->raw();
-        $project = $user->projects()->create($project_raw);
+        $project = ProjectFactory::create();
 
         $attributes = [
             'body' => $this->faker->paragraph,
         ];
 
-        $this->post($project->path() . '/tasks', $attributes);
+        $this->be($project->owner)
+            ->post($project->path() . '/tasks', $attributes);
 
         $this->get($project->path())
             ->assertSee($attributes['body']);
@@ -90,22 +86,15 @@ class ProjectTasksTest extends TestCase
      */
     public function a_task_can_be_updated()
     {
-        $this->withoutExceptionHandling();
-
-        $user = factory('App\User')->create();
-        $this->signIn($user);
-
-        $project_raw = factory(Project::class)->raw();
-        $project = $user->projects()->create($project_raw);
-
-        $task = $project->addTask('added task');
+        $project = ProjectFactory::withTasks(1)->create();
 
         $attributes = [
             'body' => 'changed task',
             'completed' => true,
         ];
 
-        $this->patch($task->path(), $attributes);
+        $this->be($project->owner)
+            ->patch($project->tasks()->first()->path(), $attributes);
 
         $this->assertDatabaseHas('tasks', $attributes);
     }
@@ -115,15 +104,12 @@ class ProjectTasksTest extends TestCase
      */
     public function a_task_requires_a_body()
     {
-        $user = factory('App\User')->create();
-        $this->signIn($user);
-
-        $project_raw = factory(Project::class)->raw();
-        $project = $user->projects()->create($project_raw);
+        $project = ProjectFactory::create();
 
         $attributes = factory('App\Task')->raw(['body' => '']);
 
-        $this->post($project->path() . '/tasks', $attributes)
+        $this->be($project->owner)
+            ->post($project->path() . '/tasks', $attributes)
             ->assertSessionHasErrors(['body']);
     }
 }

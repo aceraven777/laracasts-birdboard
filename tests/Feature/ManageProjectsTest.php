@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Project;
 use Tests\TestCase;
+use Facades\Tests\Setup\ProjectFactory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -45,8 +46,6 @@ class ManageProjectsTest extends TestCase
      */
     public function a_user_can_create_a_project()
     {
-        $this->withoutExceptionHandling();
-
         $this->signIn();
 
         // Check if page to create a project exists
@@ -64,8 +63,6 @@ class ManageProjectsTest extends TestCase
 
         $response->assertRedirect($project->path());
 
-        $this->assertDatabaseHas('projects', $attributes);
-
         $this->get($project->path())
             ->assertSee($attributes['title'])
             ->assertSee($attributes['description'])
@@ -77,18 +74,13 @@ class ManageProjectsTest extends TestCase
      */
     public function a_user_can_update_a_project()
     {
-        $this->withoutExceptionHandling();
+        $project = ProjectFactory::create();
 
-        $user = factory('App\User')->create();
-        $project = factory('App\Project')->create(['owner_id' => $user->id]);
-
-        $this->signIn($user);
-        
         $changed_notes_text = 'Changed';
 
-        $this->patch($project->path(), [
-            'notes' => $changed_notes_text,
-        ])->assertRedirect($project->path());
+        $this->be($project->owner)
+            ->patch($project->path(), ['notes' => $changed_notes_text])
+            ->assertRedirect($project->path());
 
         $this->assertDatabaseHas('projects', [
             'id' => $project->id,
@@ -101,14 +93,10 @@ class ManageProjectsTest extends TestCase
      */
     public function a_user_can_view_their_project()
     {
-        $this->withoutExceptionHandling();
+        $project = ProjectFactory::create();
 
-        $user = factory('App\User')->create();
-        $project = factory('App\Project')->create(['owner_id' => $user->id]);
-
-        $this->signIn($user);
-
-        $this->get($project->path())
+        $this->be($project->owner)
+            ->get($project->path())
             ->assertSee($project->title)
             ->assertSee($project->description);
     }
