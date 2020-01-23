@@ -36,6 +36,10 @@ class ManageProjectsTest extends TestCase
         $this->post('/projects', $project_raw)
             ->assertRedirect('login');
 
+        // Try to view edit project form
+        $this->get($project->path() . '/edit')
+            ->assertRedirect('login');
+
         // Try to update a project
         $this->patch($project->path(), $project_raw)
             ->assertRedirect('login');
@@ -76,16 +80,21 @@ class ManageProjectsTest extends TestCase
     {
         $project = ProjectFactory::create();
 
-        $changed_notes_text = 'Changed';
+        $attributes = [
+            'title' => 'title changed',
+            'description' => 'description changed',
+            'notes' => 'notes changed',
+        ];
 
         $this->be($project->owner)
-            ->patch($project->path(), ['notes' => $changed_notes_text])
+            ->patch($project->path(), $attributes)
             ->assertRedirect($project->path());
 
-        $this->assertDatabaseHas('projects', [
-            'id' => $project->id,
-            'notes' => $changed_notes_text,
-        ]);
+        $this->get($project->path() . '/edit')->assertOk();
+
+        $attributes['id'] = $project->id;
+
+        $this->assertDatabaseHas('projects', $attributes);
     }
 
     /**

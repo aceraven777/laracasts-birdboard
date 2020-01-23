@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Project;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
@@ -46,18 +45,11 @@ class ProjectController extends Controller
     /**
      * Create Project
      *
-     * @param Request $request
      * @return \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store()
     {
-        $this->validate($request, [
-            'title' => 'required',
-            'description' => 'required',
-            'notes' => 'min:3',
-        ]);
-
-        $attributes = $request->only(['title', 'description', 'notes']);
+        $attributes = $this->validateRequest();
 
         $project = Auth::user()->projects()->create($attributes);
 
@@ -65,20 +57,44 @@ class ProjectController extends Controller
     }
 
     /**
+     * Edit project form
+     *
+     * @param Project $project
+     * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
+     */
+    public function edit(Project $project)
+    {
+        return view('projects.edit', compact('project'));
+    }
+
+    /**
      * Update project
      *
-     * @param Request $request
      * @param Project $project
      * @return \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, Project $project)
+    public function update(Project $project)
     {
         $this->authorize('update', $project);
 
-        $attributes = $request->only(['notes']);
+        $attributes = $this->validateRequest();
 
         $project->update($attributes);
 
         return redirect($project->path());
+    }
+
+    /**
+     * Validate form request
+     *
+     * @return array
+     */
+    protected function validateRequest()
+    {
+        return request()->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'notes' => 'min:3',
+        ]);
     }
 }

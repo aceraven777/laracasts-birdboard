@@ -1,10 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
-    <form method="POST" action="/projects" class="lg:w-1/2 lg:mx-auto bg-white py-12 px-16 rounded shadow">
+    <div class="lg:w-1/2 lg:mx-auto bg-white py-12 px-16 rounded shadow">
+        <h1 class="text-2xl font-normal mb-10 text-center">
+            Let’s start something new
+        </h1>
+
+        <form
+            method="POST"
+            action="/projects"
+        >
+            @include('projects.form', [
+                'project' => new App\Project,
+                'buttonText' => 'Create Project'
+            ])
+        </form>
+    </div>
+
+    {{-- <form method="POST" action="/projects" class="lg:w-1/2 lg:mx-auto bg-white py-12 px-16 rounded shadow">
         @csrf
 
-        <h1 class="text-2xl font-normal mb-10 text-center">Let’s start something new</h1>
+        <h1 class="text-2xl font-normal mb-10 text-center">
+            Let’s start something new
+        </h1>
 
         <div class="field mb-6">
             <label class="label text-sm mb-2 block" for="title">Title</label>
@@ -28,5 +46,5 @@
                 <a href="/projects">Cancel</a>
             </div>
         </div>
-    </form>
+    </form> --}}
 @endsection
