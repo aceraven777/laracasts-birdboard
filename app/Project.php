@@ -29,6 +29,16 @@ class Project extends Model
     }
 
     /**
+     * Get project activities
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    /**
      * Get project uri path
      *
      * @return string
