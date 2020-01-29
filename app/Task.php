@@ -6,9 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    protected $fillable = ['project_id', 'body', 'completed'];
+    protected $fillable = ['project_id', 'body'];
 
     protected $touches = ['project'];
+
+    protected $casts = [
+        'completed' => 'boolean'
+    ];
+
+    /**
+     * Model booting method
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($task) {
+            $task->project->recordActivity('created_task');
+        });
+    }
 
     /**
      * Get the project of the task
@@ -28,5 +46,18 @@ class Task extends Model
     public function path()
     {
         return "/projects/{$this->project->id}/tasks/{$this->id}";
+    }
+
+    /**
+     * Mark project as complete
+     *
+     * @return void
+     */
+    public function complete()
+    {
+        $this->completed = true;
+        $this->save();
+
+        $this->project->recordActivity('completed_task');
     }
 }
