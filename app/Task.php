@@ -60,4 +60,15 @@ class Task extends Model
 
         $this->project->recordActivity('completed_task');
     }
+
+    /**
+     * Mark project as incomplete
+     *
+     * @return void
+     */
+    public function incomplete()
+    {
+        $this->completed = false;
+        $this->save();
+    }
 }
