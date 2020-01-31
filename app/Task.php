@@ -15,20 +15,6 @@ class Task extends Model
     ];
 
     /**
-     * Model booting method
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::created(function ($task) {
-            $task->project->recordActivity('created_task');
-        });
-    }
-
-    /**
      * Get the project of the task
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -70,5 +56,7 @@ class Task extends Model
     {
         $this->completed = false;
         $this->save();
+
+        $this->project->recordActivity('incompleted_task');
     }
 }

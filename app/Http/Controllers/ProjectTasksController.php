@@ -47,22 +47,8 @@ class ProjectTasksController extends Controller
 
         $task->update($attributes);
 
-        $this->markTaskCompletion($task, $request);
+        $request->input('completed') ? $task->complete() : $task->incomplete();
 
         return redirect($project->path());
-    }
-
-    /**
-     * Mark task as complete / incomplete
-     *
-     * @param Task $task
-     * @param Request $request
-     * @return void
-     */
-    private function markTaskCompletion($task, $request)
-    {
-        $method = $request->input('completed') ? 'complete' : 'incomplete';
-
-        $task->$method();
     }
 }
