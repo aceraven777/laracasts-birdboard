@@ -35,7 +35,7 @@ class Project extends Model
      */
     public function activities()
     {
-        return $this->hasMany(Activity::class)->latest();
+        return $this->morphMany(Activity::class, 'subject')->latest();
     }
 
     /**
@@ -67,6 +67,9 @@ class Project extends Model
      */
     public function recordActivity($description)
     {
-        $this->activities()->create(compact('description'));
+        $this->activities()->create([
+            'project_id' => $this->id,
+            'description' => $description,
+        ]);
     }
 }

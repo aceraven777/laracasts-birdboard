@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Task;
 use Tests\TestCase;
 use Facades\Tests\Setup\ProjectFactory;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -43,8 +44,14 @@ class TriggerActivityTest extends TestCase
 
         $project->addTask('Some task');
 
-        $this->assertCount(2, $project->activities);
-        $this->assertEquals('created_task', $project->activities->last()->description);
+        $task_activities = $project->tasks->last()->activities;
+        $this->assertCount(1, $task_activities);
+
+        tap($task_activities->last(), function ($activity) {
+            $this->assertEquals('created_task', $activity->description);
+            $this->assertInstanceOf(Task::class, $activity->subject);
+            $this->assertEquals('Some task', $activity->subject->body);
+        });
     }
 
     /**
@@ -61,8 +68,14 @@ class TriggerActivityTest extends TestCase
                 'completed' => true,
             ]);
 
-        $this->assertCount(3, $project->activities);
-        $this->assertEquals('completed_task', $project->activities->last()->description);
+        $task_activities = $project->tasks->last()->activities;
+
+        $this->assertCount(2, $task_activities);
+
+        tap($task_activities->last(), function ($activity) {
+            $this->assertEquals('completed_task', $activity->description);
+            $this->assertInstanceOf(Task::class, $activity->subject);
+        });
 
         // Incomplete a task
         $this->actingAs($project->owner)
@@ -73,8 +86,14 @@ class TriggerActivityTest extends TestCase
 
         $project->refresh();
 
-        $this->assertCount(4, $project->activities);
-        $this->assertEquals('incompleted_task', $project->activities->last()->description);
+        $task_activities = $project->tasks->last()->activities;
+
+        $this->assertCount(3, $task_activities);
+
+        tap($task_activities->last(), function ($activity) {
+            $this->assertEquals('incompleted_task', $activity->description);
+            $this->assertInstanceOf(Task::class, $activity->subject);
+        });
     }
 
     /**
@@ -86,7 +105,9 @@ class TriggerActivityTest extends TestCase
 
         $project->tasks[0]->delete();
 
-        $this->assertCount(3, $project->activities);
-        $this->assertEquals('deleted_task', $project->activities->last()->description);
+        $project_activities = $project->activities;
+
+        $this->assertCount(2, $project_activities);
+        $this->assertEquals('deleted_task', $project_activities->last()->description);
     }
 }
