@@ -6,13 +6,37 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
+    use RecordsActivity;
+
+    /**
+     * Fillable fields
+     *
+     * @var array
+     */
     protected $fillable = ['project_id', 'body'];
 
+    /**
+     * Update also the updated_at fields in the relationships
+     *
+     * @var array
+     */
     protected $touches = ['project'];
 
+    /**
+     * Fields to casts
+     *
+     * @var array
+     */
     protected $casts = [
         'completed' => 'boolean'
     ];
+
+    /**
+     * Recordable events
+     *
+     * @var array
+     */
+    protected static $recordableEvents = ['created', 'deleted'];
 
     /**
      * Get the project of the task
@@ -22,16 +46,6 @@ class Task extends Model
     public function project()
     {
         return $this->belongsTo('App\Project');
-    }
-
-    /**
-     * Get project activities
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function activities()
-    {
-        return $this->morphMany(Activity::class, 'subject')->latest();
     }
 
     /**
@@ -68,19 +82,5 @@ class Task extends Model
         $this->save();
 
         $this->recordActivity('incompleted_task');
-    }
-
-    /**
-     * Record Task Activity
-     *
-     * @param string $description
-     * @return void
-     */
-    public function recordActivity($description)
-    {
-        $this->activities()->create([
-            'project_id' => $this->project_id,
-            'description' => $description,
-        ]);
     }
 }

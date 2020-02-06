@@ -6,19 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
+    use RecordsActivity;
+
     /**
      * Fillable fields
      *
      * @var array
      */
     protected $fillable = ['owner_id', 'title', 'description', 'notes'];
-
-    /**
-     * Old value of the project (used in recording activity)
-     *
-     * @var array
-     */
-    public $old = [];
 
     /**
      * Get owner of project
@@ -38,16 +33,6 @@ class Project extends Model
     public function tasks()
     {
         return $this->hasMany('App\Task');
-    }
-
-    /**
-     * Get project activities
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function activities()
-    {
-        return $this->morphMany(Activity::class, 'subject')->latest();
     }
 
     /**
@@ -72,37 +57,12 @@ class Project extends Model
     }
 
     /**
-     * Record Project Activity
+     * The activity feed for the project.
      *
-     * @param string $description
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function recordActivity($description)
+    public function activities()
     {
-        $this->activities()->create([
-            'project_id' => $this->id,
-            'description' => $description,
-            'changes' => $this->activityChanges($description),
-        ]);
-    }
-
-    /**
-     * Get activity changes
-     *
-     * @param string $description
-     * @return array|null
-     */
-    protected function activityChanges($description)
-    {
-        $changes = null;
-
-        if ($description == 'updated') {
-            $changes = [
-                'before' => array_except(array_diff($this->old, $this->getAttributes()), 'updated_at'),
-                'after' => array_except($this->getChanges(), 'updated_at'),
-            ];
-        }
-
-        return $changes;
+        return $this->hasMany(Activity::class)->latest();
     }
 }
