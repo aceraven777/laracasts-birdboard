@@ -1,1 +1,1 @@
-You deleted a task
+{{ $activity->user->name }} deleted a task

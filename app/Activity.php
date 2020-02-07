@@ -11,7 +11,7 @@ class Activity extends Model
      *
      * @var array
      */
-    protected $fillable = ['project_id', 'description', 'changes'];
+    protected $fillable = ['user_id', 'project_id', 'description', 'changes'];
 
     /**
      * Casts properties
@@ -30,5 +30,15 @@ class Activity extends Model
     public function subject()
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Get user who did the activity
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo('App\User');
     }
 }
