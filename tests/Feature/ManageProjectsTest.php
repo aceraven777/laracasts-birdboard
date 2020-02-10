@@ -43,6 +43,10 @@ class ManageProjectsTest extends TestCase
         // Try to update a project
         $this->patch($project->path(), $project_raw)
             ->assertRedirect('login');
+
+        // Try to delete a project
+        $this->delete($project->path())
+            ->assertRedirect('login');
     }
 
     /**
@@ -71,6 +75,24 @@ class ManageProjectsTest extends TestCase
             ->assertSee($attributes['title'])
             ->assertSee($attributes['description'])
             ->assertSee($attributes['notes']);
+    }
+
+    /**
+     * @test
+     */
+    public function a_user_can_delete_a_project()
+    {
+        $project = ProjectFactory::create();
+
+        $project_id = $project->id;
+
+        $this->be($project->owner)
+            ->delete($project->path())
+            ->assertRedirect('/projects');
+
+        $this->assertDatabaseMissing('projects', [
+            'id' => $project_id
+        ]);
     }
 
     /**
@@ -148,6 +170,18 @@ class ManageProjectsTest extends TestCase
         $project = factory('App\Project')->create();
 
         $this->patch($project->path())
+            ->assertStatus(403);
+    }
+
+    /**
+     * @test
+     */
+    public function an_authenticated_user_cannot_delete_the_projects_of_others()
+    {
+        $this->signIn();
+        $project = factory('App\Project')->create();
+
+        $this->delete($project->path())
             ->assertStatus(403);
     }
 
