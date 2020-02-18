@@ -38,12 +38,28 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get user projects
+     * Get user owned projects
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function projects()
     {
         return $this->hasMany('App\Project', 'owner_id')->latest('updated_at');
+    }
+
+    /**
+     * Get user projects (including all project he invited to)
+     *
+     * @return void
+     */
+    public function accessibleProjects()
+    {
+        $user_id = $this->id;
+
+        return Project::where('owner_id', $user_id)
+            ->orWhereHas('members', function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })
+            ->get();
     }
 }
