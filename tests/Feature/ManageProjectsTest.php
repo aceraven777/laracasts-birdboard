@@ -43,10 +43,6 @@ class ManageProjectsTest extends TestCase
         // Try to update a project
         $this->patch($project->path(), $project_raw)
             ->assertRedirect('login');
-
-        // Try to delete a project
-        $this->delete($project->path())
-            ->assertRedirect('login');
     }
 
     /**
@@ -54,24 +50,15 @@ class ManageProjectsTest extends TestCase
      */
     public function a_user_can_create_a_project()
     {
-        $this->signIn();
+        $user = $this->signIn();
 
         // Check if page to create a project exists
         $this->get('/projects/create')->assertStatus(200);
 
-        $attributes = [
-            'title' => $this->faker->sentence,
-            'description' => $this->faker->sentence,
-            'notes' => $this->faker->paragraph,
-        ];
+        $attributes = factory(Project::class)->raw();
 
-        $response = $this->post('/projects', $attributes);
-
-        $project = Project::where($attributes)->first();
-
-        $response->assertRedirect($project->path());
-
-        $this->get($project->path())
+        $response = $this->followingRedirects()
+            ->post('/projects', $attributes)
             ->assertSee($attributes['title'])
             ->assertSee($attributes['description'])
             ->assertSee($attributes['notes']);
@@ -189,10 +176,20 @@ class ManageProjectsTest extends TestCase
     /**
      * @test
      */
-    public function an_authenticated_user_cannot_delete_the_projects_of_others()
+    public function unauthorized_users_cannot_delete_the_projects()
     {
-        $this->signIn();
         $project = factory('App\Project')->create();
+
+        // Try to delete a project
+        $this->delete($project->path())
+            ->assertRedirect('login');
+
+        $user = $this->signIn();
+
+        $this->delete($project->path())
+            ->assertStatus(403);
+
+        $project->invite($user);
 
         $this->delete($project->path())
             ->assertStatus(403);
