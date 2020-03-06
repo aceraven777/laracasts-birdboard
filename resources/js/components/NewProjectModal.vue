@@ -41,7 +41,7 @@
                         <input
                             v-for="(task, index) in form.tasks"
                             :key="index"
-                            v-model="task.value"
+                            v-model="task.body"
                             type="text"
                             class="border border-muted-light mb-2 p-2 text-xs block w-full rounded"
                             :placeholder="'Task ' + (index + 1)"
@@ -77,7 +77,7 @@
                     title: '',
                     description: '',
                     tasks: [
-                        { value: '' }
+                        { body: '' }
                     ]
                 },
                 
@@ -87,7 +87,7 @@
 
         methods: {
             addTask() {
-                this.form.tasks.push({ value: '' });
+                this.form.tasks.push({ body: '' });
             },
 
             async submit() {

@@ -53,6 +53,10 @@ class ProjectController extends Controller
 
         $project = Auth::user()->projects()->create($attributes);
 
+        if (request()->has('tasks')) {
+            $project->addTasks($attributes['tasks']);
+        }
+
         if (request()->wantsJson()) {
             return ['message' => $project->path()];
         }
@@ -114,6 +118,8 @@ class ProjectController extends Controller
             'title' => 'sometimes|required',
             'description' => 'sometimes|required',
             'notes' => 'nullable',
+            'tasks' => 'array',
+            'tasks.*.body' => 'string',
         ]);
     }
 }

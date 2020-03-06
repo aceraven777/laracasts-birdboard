@@ -50,18 +50,41 @@ class ManageProjectsTest extends TestCase
      */
     public function a_user_can_create_a_project()
     {
-        $user = $this->signIn();
+        $this->signIn();
 
         // Check if page to create a project exists
         $this->get('/projects/create')->assertStatus(200);
 
         $attributes = factory(Project::class)->raw();
 
-        $response = $this->followingRedirects()
+        $this->followingRedirects()
             ->post('/projects', $attributes)
             ->assertSee($attributes['title'])
             ->assertSee($attributes['description'])
             ->assertSee($attributes['notes']);
+    }
+
+    /**
+     * @test
+     */
+    public function tasks_can_be_included_as_part_of_a_new_project_creation()
+    {
+        $this->signIn();
+
+        $attributes = factory(Project::class)->raw();
+
+        $task1 = 'Task 1';
+        $task2 = 'Task 2';
+
+        $attributes['tasks'] = [
+            ['body' => $task1],
+            ['body' => $task2],
+        ];
+
+        $this->followingRedirects()
+            ->post('/projects', $attributes);
+
+        $this->assertCount(2, Project::latest()->first()->tasks);
     }
 
     /**
