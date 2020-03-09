@@ -13,10 +13,10 @@
                             type="text"
                             id="title"
                             class="border p-2 text-xs block w-full rounded"
-                            :class="errors.title ? 'border-error' : 'border-muted-light'"
+                            :class="form.errors.title ? 'border-error' : 'border-muted-light'"
                         >
 
-                        <span v-if="errors.title" class="text-xs italic text-error" v-text="errors.title[0]"></span>
+                        <span v-if="form.errors.title" class="text-xs italic text-error" v-text="form.errors.title[0]"></span>
                     </div>
 
                     <div class="mb-4">
@@ -27,10 +27,10 @@
                             id="description"
                             rows="7"
                             class="border p-2 text-xs block w-full rounded"
-                            :class="errors.description ? 'border-error' : 'border-muted-light'"
+                            :class="form.errors.description ? 'border-error' : 'border-muted-light'"
                         ></textarea>
 
-                        <span v-if="errors.description" class="text-xs italic text-error" v-text="errors.description[0]"></span>
+                        <span v-if="form.errors.description" class="text-xs italic text-error" v-text="form.errors.description[0]"></span>
                     </div>
                 </div>
 
@@ -70,18 +70,18 @@
 </template>
 
 <script>
+    import BirdboardForm from './BirdboardForm';
+    
     export default {
         data() {
             return {
-                form: {
+                form: new BirdboardForm({
                     title: '',
                     description: '',
                     tasks: [
                         { body: '' }
                     ]
-                },
-                
-                errors: {}
+                })
             };
         },
 
@@ -91,13 +91,10 @@
             },
 
             async submit() {
-                try {
-                    let response = await axios.post('/projects', this.form);
-
-                    location = response.data.message;
-                } catch (error) {
-                    this.errors = error.response.data.errors;
-                }
+                this.form.submit('/projects')
+                    .then(response => {
+                        location = response.data.message
+                    });
             }
         }
     }

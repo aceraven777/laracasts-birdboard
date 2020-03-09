@@ -64,6 +64,11 @@ class Project extends Model
      */
     public function addTasks($tasks)
     {
+        // Remove empty body
+        $tasks = array_filter($tasks, function ($task) {
+            return isset($task['body']) && $task['body'];
+        });
+
         return $this->tasks()->createMany($tasks);
     }
 

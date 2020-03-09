@@ -119,7 +119,6 @@ class ProjectController extends Controller
             'description' => 'sometimes|required',
             'notes' => 'nullable',
             'tasks' => 'array',
-            'tasks.*.body' => 'string',
         ]);
     }
 }
