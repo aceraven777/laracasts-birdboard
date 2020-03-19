@@ -51,21 +51,27 @@
                                 @endif
                             @else
                                 <theme-switcher></theme-switcher>
+                                
+                                <dropdown width="200px" align="right">
+                                    <template v-slot:trigger>
+                                        <button
+                                            class="flex items-center text-default no-underline text-sm focus:outline-none"
+                                            href="#"
+                                        >
+                                            <img width="35"
+                                                    class="rounded-full mr-3"
+                                                    src="{{ gravatar_url(auth()->user()->email) }}">
 
-                                <a
-                                    class="flex items-center text-default no-underline text-sm"
-                                    href="#" role="button"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                    v-pre
-                                >
-                                    <img width="35"
-                                            class="rounded-full mr-3"
-                                            src="{{ gravatar_url(auth()->user()->email) }}">
+                                            {{ auth()->user()->name }}
+                                        </button>
+                                    </template>
 
-                                    JeffreyWay
-                                </a>
+                                    <form id="logout-form" method="POST" action="/logout">
+                                        @csrf
+
+                                        <button type="submit" class="dropdown-menu-link w-full text-left">Logout</button>
+                                    </form>
+                                </dropdown>
                             @endguest
                         </div>
                     </div>
